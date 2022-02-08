@@ -1,12 +1,12 @@
 package pkg
 
 import (
-	"crawlergo/pkg/config"
-	"crawlergo/pkg/logger"
-	model2 "crawlergo/pkg/model"
-	"crawlergo/pkg/tools"
-	"crawlergo/pkg/tools/requests"
 	"fmt"
+	"github.com/shadow1ng/crawlergo/pkg/config"
+	"github.com/shadow1ng/crawlergo/pkg/logger"
+	"github.com/shadow1ng/crawlergo/pkg/model"
+	"github.com/shadow1ng/crawlergo/pkg/tools"
+	"github.com/shadow1ng/crawlergo/pkg/tools/requests"
 	"regexp"
 	"strings"
 	"sync"
@@ -41,9 +41,9 @@ var validateUrl mapset.Set
 /**
 从robots.txt文件中获取路径信息
 */
-func GetPathsFromRobots(navReq model2.Request) []*model2.Request {
+func GetPathsFromRobots(navReq model.Request) []*model.Request {
 	logger.Logger.Info("starting to get paths from robots.txt.")
-	var result []*model2.Request
+	var result []*model.Request
 	var urlFindRegex = regexp.MustCompile(`(?:Disallow|Allow):.*?(/.+)`)
 	var urlRegex = regexp.MustCompile(`(/.+)`)
 
@@ -67,11 +67,11 @@ func GetPathsFromRobots(navReq model2.Request) []*model2.Request {
 	for _, _url := range urlList {
 		_url = strings.TrimSpace(_url)
 		_url = urlRegex.FindString(_url)
-		url, err := model2.GetUrl(_url, *navReq.URL)
+		url, err := model.GetUrl(_url, *navReq.URL)
 		if err != nil {
 			continue
 		}
-		req := model2.GetRequest(config.GET, url)
+		req := model.GetRequest(config.GET, url)
 		req.Source = config.FromRobots
 		result = append(result, &req)
 	}
@@ -81,7 +81,7 @@ func GetPathsFromRobots(navReq model2.Request) []*model2.Request {
 /**
 使用常见路径列表进行fuzz
 */
-func GetPathsByFuzz(navReq model2.Request) []*model2.Request {
+func GetPathsByFuzz(navReq model.Request) []*model.Request {
 	logger.Logger.Info("starting to get paths by fuzzing.")
 	pathList := strings.Split(pathStr, "/")
 	return doFuzz(navReq, pathList)
@@ -90,7 +90,7 @@ func GetPathsByFuzz(navReq model2.Request) []*model2.Request {
 /**
 使用字典列表进行fuzz
 */
-func GetPathsByFuzzDict(navReq model2.Request, dictPath string) []*model2.Request {
+func GetPathsByFuzzDict(navReq model.Request, dictPath string) []*model.Request {
 	logger.Logger.Infof("starting to get dict path by fuzzing: %s", dictPath)
 	pathList := tools.ReadFile(dictPath)
 	logger.Logger.Debugf("valid path count: %d", len(pathList))
@@ -98,13 +98,13 @@ func GetPathsByFuzzDict(navReq model2.Request, dictPath string) []*model2.Reques
 }
 
 type singleFuzz struct {
-	navReq model2.Request
+	navReq model.Request
 	path   string
 }
 
-func doFuzz(navReq model2.Request, pathList []string) []*model2.Request {
+func doFuzz(navReq model.Request, pathList []string) []*model.Request {
 	validateUrl = mapset.NewSet()
-	var result []*model2.Request
+	var result []*model.Request
 	pool, _ := ants.NewPool(20)
 	defer pool.Release()
 	for _, path := range pathList {
@@ -126,11 +126,11 @@ func doFuzz(navReq model2.Request, pathList []string) []*model2.Request {
 	pathFuzzWG.Wait()
 	for _, _url := range validateUrl.ToSlice() {
 		_url := _url.(string)
-		url, err := model2.GetUrl(_url)
+		url, err := model.GetUrl(_url)
 		if err != nil {
 			continue
 		}
-		req := model2.GetRequest(config.GET, url)
+		req := model.GetRequest(config.GET, url)
 		req.Source = config.FromFuzz
 		result = append(result, &req)
 	}
@@ -157,7 +157,7 @@ func (s singleFuzz) doRequest() {
 			return
 		}
 		location := locations[0]
-		redirectUrl, err := model2.GetUrl(location)
+		redirectUrl, err := model.GetUrl(location)
 		if err != nil {
 			return
 		}

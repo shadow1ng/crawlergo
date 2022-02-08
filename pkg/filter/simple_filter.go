@@ -1,9 +1,9 @@
 package filter
 
 import (
-	"crawlergo/pkg/config"
-	"crawlergo/pkg/model"
 	"github.com/deckarep/golang-set"
+	"github.com/shadow1ng/crawlergo/pkg/config"
+	"github.com/shadow1ng/crawlergo/pkg/model"
 	"strings"
 )
 

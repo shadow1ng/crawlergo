@@ -1,4 +1,4 @@
-module crawlergo
+module github.com/shadow1ng/crawlergo
 
 go 1.12
 

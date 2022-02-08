@@ -1,12 +1,12 @@
 package pkg
 
 import (
-	"crawlergo/pkg/config"
-	engine2 "crawlergo/pkg/engine"
-	filter2 "crawlergo/pkg/filter"
-	"crawlergo/pkg/logger"
-	"crawlergo/pkg/model"
 	"encoding/json"
+	"github.com/shadow1ng/crawlergo/pkg/config"
+	"github.com/shadow1ng/crawlergo/pkg/engine"
+	"github.com/shadow1ng/crawlergo/pkg/filter"
+	"github.com/shadow1ng/crawlergo/pkg/logger"
+	"github.com/shadow1ng/crawlergo/pkg/model"
 	"strings"
 	"sync"
 	"time"
@@ -15,16 +15,16 @@ import (
 )
 
 type CrawlerTask struct {
-	Browser       *engine2.Browser    //
-	RootDomain    string              // 当前爬取根域名 用于子域名收集
-	Targets       []*model.Request    // 输入目标
-	Result        *Result             // 最终结果
-	Config        *TaskConfig         // 配置信息
-	smartFilter   filter2.SmartFilter // 过滤对象
-	Pool          *ants.Pool          // 协程池
-	taskWG        sync.WaitGroup      // 等待协程池所有任务结束
-	crawledCount  int                 // 爬取过的数量
-	taskCountLock sync.Mutex          // 已爬取的任务总数锁
+	Browser       *engine.Browser    //
+	RootDomain    string             // 当前爬取根域名 用于子域名收集
+	Targets       []*model.Request   // 输入目标
+	Result        *Result            // 最终结果
+	Config        *TaskConfig        // 配置信息
+	smartFilter   filter.SmartFilter // 过滤对象
+	Pool          *ants.Pool         // 协程池
+	taskWG        sync.WaitGroup     // 等待协程池所有任务结束
+	crawledCount  int                // 爬取过的数量
+	taskCountLock sync.Mutex         // 已爬取的任务总数锁
 }
 
 type Result struct {
@@ -63,7 +63,7 @@ type TaskConfig struct {
 
 type tabTask struct {
 	crawlerTask *CrawlerTask
-	browser     *engine2.Browser
+	browser     *engine.Browser
 	req         *model.Request
 	pool        *ants.Pool
 }
@@ -75,8 +75,8 @@ func NewCrawlerTask(targets []*model.Request, taskConf TaskConfig) (*CrawlerTask
 	crawlerTask := CrawlerTask{
 		Result: &Result{},
 		Config: &taskConf,
-		smartFilter: filter2.SmartFilter{
-			SimpleFilter: filter2.SimpleFilter{
+		smartFilter: filter.SmartFilter{
+			SimpleFilter: filter.SimpleFilter{
 				HostLimit: targets[0].URL.Host,
 			},
 		},
@@ -144,7 +144,7 @@ func NewCrawlerTask(targets []*model.Request, taskConf TaskConfig) (*CrawlerTask
 		}
 	}
 
-	crawlerTask.Browser = engine2.InitBrowser(taskConf.ChromiumPath, taskConf.IncognitoContext, taskConf.ExtraHeaders, taskConf.Proxy, taskConf.NoHeadless)
+	crawlerTask.Browser = engine.InitBrowser(taskConf.ChromiumPath, taskConf.IncognitoContext, taskConf.ExtraHeaders, taskConf.Proxy, taskConf.NoHeadless)
 	crawlerTask.RootDomain = targets[0].URL.RootDomain()
 
 	crawlerTask.smartFilter.Init()
@@ -207,7 +207,7 @@ func (t *CrawlerTask) Run() {
 	logger.Logger.Info("filter repeat, target count: ", len(initTasks))
 
 	for _, req := range initTasks {
-		if !engine2.IsIgnoredByKeywordMatch(*req, t.Config.IgnoreKeywords) {
+		if !engine.IsIgnoredByKeywordMatch(*req, t.Config.IgnoreKeywords) {
 			t.addTask2Pool(req)
 		}
 	}
@@ -221,7 +221,7 @@ func (t *CrawlerTask) Run() {
 	}
 
 	t.Result.AllReqList = []*model.Request{}
-	var simpleFilter filter2.SimpleFilter
+	var simpleFilter filter.SimpleFilter
 	for _, req := range todoFilterAll {
 		a := req.URL.String()
 		if strings.HasPrefix(a, "data:image") {
@@ -274,7 +274,7 @@ func (t *CrawlerTask) addTask2Pool(req *model.Request) {
 */
 func (t *tabTask) Task() {
 	defer t.crawlerTask.taskWG.Done()
-	tab := engine2.NewTab(t.browser, *t.req, engine2.TabConfig{
+	tab := engine.NewTab(t.browser, *t.req, engine.TabConfig{
 		TabRunTimeout:           t.crawlerTask.Config.TabRunTimeout,
 		DomContentLoadedTimeout: t.crawlerTask.Config.DomContentLoadedTimeout,
 		EventTriggerMode:        t.crawlerTask.Config.EventTriggerMode,
@@ -298,7 +298,7 @@ func (t *tabTask) Task() {
 				t.crawlerTask.Result.resultLock.Lock()
 				t.crawlerTask.Result.ReqList = append(t.crawlerTask.Result.ReqList, req)
 				t.crawlerTask.Result.resultLock.Unlock()
-				if !engine2.IsIgnoredByKeywordMatch(*req, t.crawlerTask.Config.IgnoreKeywords) {
+				if !engine.IsIgnoredByKeywordMatch(*req, t.crawlerTask.Config.IgnoreKeywords) {
 					t.crawlerTask.addTask2Pool(req)
 				}
 			}
@@ -307,7 +307,7 @@ func (t *tabTask) Task() {
 				t.crawlerTask.Result.resultLock.Lock()
 				t.crawlerTask.Result.ReqList = append(t.crawlerTask.Result.ReqList, req)
 				t.crawlerTask.Result.resultLock.Unlock()
-				if !engine2.IsIgnoredByKeywordMatch(*req, t.crawlerTask.Config.IgnoreKeywords) {
+				if !engine.IsIgnoredByKeywordMatch(*req, t.crawlerTask.Config.IgnoreKeywords) {
 					t.crawlerTask.addTask2Pool(req)
 				}
 			}

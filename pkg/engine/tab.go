@@ -2,10 +2,6 @@ package engine
 
 import (
 	"context"
-	"crawlergo/pkg/config"
-	"crawlergo/pkg/js"
-	"crawlergo/pkg/logger"
-	model2 "crawlergo/pkg/model"
 	"encoding/json"
 	"fmt"
 	"github.com/chromedp/cdproto/cdp"
@@ -16,6 +12,10 @@ import (
 	"github.com/chromedp/cdproto/runtime"
 	"github.com/chromedp/chromedp"
 	"github.com/gogf/gf/encoding/gcharset"
+	"github.com/shadow1ng/crawlergo/pkg/config"
+	"github.com/shadow1ng/crawlergo/pkg/js"
+	"github.com/shadow1ng/crawlergo/pkg/logger"
+	"github.com/shadow1ng/crawlergo/pkg/model"
 	"regexp"
 	"strings"
 	"sync"
@@ -25,9 +25,9 @@ import (
 type Tab struct {
 	Ctx              *context.Context
 	Cancel           context.CancelFunc
-	NavigateReq      model2.Request
+	NavigateReq      model.Request
 	ExtraHeaders     map[string]interface{}
-	ResultList       []*model2.Request
+	ResultList       []*model.Request
 	TopFrameId       string
 	LoaderID         string
 	NavNetworkID     string
@@ -68,7 +68,7 @@ type bindingCallPayload struct {
 	Args []string `json:"args"`
 }
 
-func NewTab(browser *Browser, navigateReq model2.Request, config TabConfig) *Tab {
+func NewTab(browser *Browser, navigateReq model.Request, config TabConfig) *Tab {
 	var tab Tab
 	tab.ExtraHeaders = map[string]interface{}{}
 	var DOMContentLoadedRun = false
@@ -273,11 +273,11 @@ func RunWithTimeOut(ctx *context.Context, timeout time.Duration, tasks chromedp.
 */
 func (tab *Tab) AddResultUrl(method string, _url string, source string) {
 	navUrl := tab.NavigateReq.URL
-	url, err := model2.GetUrl(_url, *navUrl)
+	url, err := model.GetUrl(_url, *navUrl)
 	if err != nil {
 		return
 	}
-	option := model2.Options{
+	option := model.Options{
 		Headers:  map[string]interface{}{},
 		PostData: "",
 	}
@@ -286,7 +286,7 @@ func (tab *Tab) AddResultUrl(method string, _url string, source string) {
 	// 处理Host绑定
 	if host, ok := tab.NavigateReq.Headers["Host"]; ok {
 		if host != navUrl.Hostname() && url.Hostname() == host {
-			url, _ = model2.GetUrl(strings.Replace(url.String(), "://"+url.Hostname(), "://"+navUrl.Hostname(), -1), *navUrl)
+			url, _ = model.GetUrl(strings.Replace(url.String(), "://"+url.Hostname(), "://"+navUrl.Hostname(), -1), *navUrl)
 			option.Headers["Host"] = host
 			referer = strings.Replace(navUrl.String(), navUrl.Host, host.(string), -1)
 		}
@@ -301,7 +301,7 @@ func (tab *Tab) AddResultUrl(method string, _url string, source string) {
 	for key, value := range tab.ExtraHeaders {
 		option.Headers[key] = value
 	}
-	req := model2.GetRequest(method, url, option)
+	req := model.GetRequest(method, url, option)
 	req.Source = source
 
 	tab.lock.Lock()
@@ -312,7 +312,7 @@ func (tab *Tab) AddResultUrl(method string, _url string, source string) {
 /**
 添加请求到结果列表，拦截请求时处理了Host绑定，此处无需处理
 */
-func (tab *Tab) AddResultRequest(req model2.Request) {
+func (tab *Tab) AddResultRequest(req model.Request) {
 	for key, value := range tab.ExtraHeaders {
 		req.Headers[key] = value
 	}
@@ -432,7 +432,7 @@ func (tab *Tab) EncodeAllURLWithCharset() {
 	}
 }
 
-func IsIgnoredByKeywordMatch(req model2.Request, IgnoreKeywords []string) bool {
+func IsIgnoredByKeywordMatch(req model.Request, IgnoreKeywords []string) bool {
 	for _, _str := range IgnoreKeywords {
 		if strings.Contains(req.URL.String(), _str) {
 			logger.Logger.Info("ignore request: ", req.SimpleFormat())

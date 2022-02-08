@@ -1,7 +1,7 @@
 package requests
 
 import (
-	"crawlergo/pkg/logger"
+	"github.com/shadow1ng/crawlergo/pkg/logger"
 	"io/ioutil"
 	"net/http"
 )

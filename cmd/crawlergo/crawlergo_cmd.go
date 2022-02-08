@@ -1,16 +1,16 @@
 package main
 
 import (
-	"crawlergo/pkg"
-	"crawlergo/pkg/config"
-	"crawlergo/pkg/logger"
-	"crawlergo/pkg/model"
-	"crawlergo/pkg/tools"
-	"crawlergo/pkg/tools/requests"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/panjf2000/ants/v2"
+	"github.com/shadow1ng/crawlergo/pkg"
+	"github.com/shadow1ng/crawlergo/pkg/config"
+	"github.com/shadow1ng/crawlergo/pkg/logger"
+	"github.com/shadow1ng/crawlergo/pkg/model"
+	"github.com/shadow1ng/crawlergo/pkg/tools"
+	"github.com/shadow1ng/crawlergo/pkg/tools/requests"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"log"

@@ -2,10 +2,10 @@ package tools
 
 import (
 	"bufio"
-	"crawlergo/pkg/logger"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/shadow1ng/crawlergo/pkg/logger"
 	"io"
 	"os"
 	"strings"

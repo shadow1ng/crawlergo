@@ -3,14 +3,14 @@ package engine
 import (
 	"bufio"
 	"context"
-	"crawlergo/pkg/config"
-	"crawlergo/pkg/logger"
-	model2 "crawlergo/pkg/model"
-	"crawlergo/pkg/tools"
-	"crawlergo/pkg/tools/requests"
 	"encoding/base64"
 	"github.com/chromedp/cdproto/fetch"
 	"github.com/chromedp/cdproto/network"
+	"github.com/shadow1ng/crawlergo/pkg/config"
+	"github.com/shadow1ng/crawlergo/pkg/logger"
+	"github.com/shadow1ng/crawlergo/pkg/model"
+	"github.com/shadow1ng/crawlergo/pkg/tools"
+	"github.com/shadow1ng/crawlergo/pkg/tools/requests"
 	"io"
 	"net/textproto"
 	"regexp"
@@ -27,17 +27,17 @@ func (tab *Tab) InterceptRequest(v *fetch.EventRequestPaused) {
 	ctx := tab.GetExecutor()
 	_req := v.Request
 	// 拦截到的URL格式一定正常 不处理错误
-	url, err := model2.GetUrl(_req.URL, *tab.NavigateReq.URL)
+	url, err := model.GetUrl(_req.URL, *tab.NavigateReq.URL)
 	if err != nil {
 		logger.Logger.Debug("InterceptRequest parse url failed: ", err)
 		_ = fetch.ContinueRequest(v.RequestID).Do(ctx)
 		return
 	}
-	_option := model2.Options{
+	_option := model.Options{
 		Headers:  _req.Headers,
 		PostData: _req.PostData,
 	}
-	req := model2.GetRequest(_req.Method, url, _option)
+	req := model.GetRequest(_req.Method, url, _option)
 
 	if IsIgnoredByKeywordMatch(req, tab.config.IgnoreKeywords) {
 		_ = fetch.FailRequest(v.RequestID, network.ErrorReasonBlockedByClient).Do(ctx)
@@ -98,7 +98,7 @@ func (tab *Tab) HandleAuthRequired(req *fetch.EventAuthRequired) {
 /**
 处理导航请求
 */
-func (tab *Tab) HandleNavigationReq(req *model2.Request, v *fetch.EventRequestPaused) {
+func (tab *Tab) HandleNavigationReq(req *model.Request, v *fetch.EventRequestPaused) {
 	navReq := tab.NavigateReq
 	ctx := tab.GetExecutor()
 	tCtx, cancel := context.WithTimeout(ctx, time.Second*5)
@@ -159,13 +159,13 @@ func (tab *Tab) HandleNavigationReq(req *model2.Request, v *fetch.EventRequestPa
 /**
 处理Host绑定
 */
-func (tab *Tab) HandleHostBinding(req *model2.Request) {
+func (tab *Tab) HandleHostBinding(req *model.Request) {
 	url := req.URL
 	navUrl := tab.NavigateReq.URL
 	// 导航请求的域名和HOST绑定中的域名不同，且当前请求的domain和导航请求header中的Host相同，则替换当前请求的domain并绑定Host
 	if host, ok := tab.NavigateReq.Headers["Host"]; ok {
 		if navUrl.Hostname() != host && url.Host == host {
-			urlObj, _ := model2.GetUrl(strings.Replace(req.URL.String(), "://"+url.Hostname(), "://"+navUrl.Hostname(), -1), *navUrl)
+			urlObj, _ := model.GetUrl(strings.Replace(req.URL.String(), "://"+url.Hostname(), "://"+navUrl.Hostname(), -1), *navUrl)
 			req.URL = urlObj
 			req.Headers["Host"] = host
 

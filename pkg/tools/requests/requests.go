@@ -2,10 +2,10 @@ package requests
 
 import (
 	"bytes"
-	"crawlergo/pkg/logger"
 	"crypto/tls"
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/shadow1ng/crawlergo/pkg/logger"
 	"net/http"
 	"net/url"
 	"strings"

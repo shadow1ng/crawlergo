@@ -1,10 +1,10 @@
 package filter
 
 import (
-	"crawlergo/pkg/config"
-	"crawlergo/pkg/logger"
-	"crawlergo/pkg/model"
-	"crawlergo/pkg/tools"
+	"github.com/shadow1ng/crawlergo/pkg/config"
+	"github.com/shadow1ng/crawlergo/pkg/logger"
+	"github.com/shadow1ng/crawlergo/pkg/model"
+	"github.com/shadow1ng/crawlergo/pkg/tools"
 	"go/types"
 	"regexp"
 	"sort"

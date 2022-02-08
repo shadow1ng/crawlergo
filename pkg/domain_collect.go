@@ -1,8 +1,8 @@
 package pkg
 
 import (
-	"crawlergo/pkg/model"
 	mapset "github.com/deckarep/golang-set"
+	"github.com/shadow1ng/crawlergo/pkg/model"
 	"strings"
 )
 

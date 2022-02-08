@@ -1,11 +1,11 @@
 package model
 
 import (
-	"crawlergo/pkg/config"
-	"crawlergo/pkg/tools"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/shadow1ng/crawlergo/pkg/config"
+	"github.com/shadow1ng/crawlergo/pkg/tools"
 	"net/url"
 	"strings"
 )
