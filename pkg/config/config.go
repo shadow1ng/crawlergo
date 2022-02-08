@@ -6,8 +6,8 @@ const (
 	DefaultUA               = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.0 Safari/537.36"
 	MaxTabsCount            = 10
 	TabRunTimeout           = 20 * time.Second
-	DefaultInputText        = "Crawlergo"
-	FormInputKeyword        = "Crawlergo"
+	DefaultInputText        = "admin"
+	FormInputKeyword        = "admin"
 	SuspectURLRegex         = `(?:"|')(((?:[a-zA-Z]{1,10}://|//)[^"'/]{1,}\.[a-zA-Z]{2,}[^"']{0,})|((?:/|\.\./|\./)[^"'><,;|*()(%%$^/\\\[\]][^"'><,;|()]{1,})|([a-zA-Z0-9_\-/]{1,}/[a-zA-Z0-9_\-/]{1,}\.(?:[a-zA-Z]{1,4}|action)(?:[\?|#][^"|']{0,}|))|([a-zA-Z0-9_\-/]{1,}/[a-zA-Z0-9_\-/]{3,}(?:[\?|#][^"|']{0,}|))|([a-zA-Z0-9_\-]{1,}\.(?:php|asp|aspx|jsp|json|action|html|js|txt|xml)(?:[\?|#][^"|']{0,}|)))(?:"|')`
 	URLRegex                = `((https?|ftp|file):)?//[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]`
 	AttrURLRegex            = ``
@@ -90,7 +90,7 @@ type ContinueResourceList []string
 var InputTextMap = map[string]map[string]interface{}{
 	"mail": {
 		"keyword": []string{"mail"},
-		"value":   "crawlergo@gmail.com",
+		"value":   "admin@qq.com",
 	},
 	"code": {
 		"keyword": []string{"yanzhengma", "code", "ver", "captcha"},
@@ -102,11 +102,11 @@ var InputTextMap = map[string]map[string]interface{}{
 	},
 	"username": {
 		"keyword": []string{"name", "user", "id", "login", "account"},
-		"value":   "crawlergo@gmail.com",
+		"value":   "admin",
 	},
 	"password": {
 		"keyword": []string{"pass", "pwd"},
-		"value":   "Crawlergo6.",
+		"value":   "123456",
 	},
 	"qq": {
 		"keyword": []string{"qq", "wechat", "tencent", "weixin"},
@@ -118,7 +118,7 @@ var InputTextMap = map[string]map[string]interface{}{
 	},
 	"url": {
 		"keyword": []string{"url", "site", "web", "blog", "link"},
-		"value":   "https://crawlergo.nice.cn/",
+		"value":   "https://www.baidu.com/",
 	},
 	"date": {
 		"keyword": []string{"date", "time", "year", "now"},

@@ -54,6 +54,12 @@ func GetUrl(_url string, parentUrls ...URL) (*URL, error) {
 
 	return &u, nil
 }
+func (u *URL) GetRawUrl() string {
+	if u.Host == "" {
+		return fmt.Sprintf("http://%v", u)
+	}
+	return u.Scheme + "://" + u.Host
+}
 
 /**
 修复不完整的URL

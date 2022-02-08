@@ -7,6 +7,7 @@ import (
 	"crawlergo/pkg/logger"
 	"crawlergo/pkg/model"
 	"encoding/json"
+	"strings"
 	"sync"
 	"time"
 
@@ -81,18 +82,18 @@ func NewCrawlerTask(targets []*model.Request, taskConf TaskConfig) (*CrawlerTask
 		},
 	}
 
-	if len(targets) == 1 {
-		_newReq := *targets[0]
-		newReq := &_newReq
-		_newURL := *_newReq.URL
-		newReq.URL = &_newURL
-		if targets[0].URL.Scheme == "http" {
-			newReq.URL.Scheme = "https"
-		} else {
-			newReq.URL.Scheme = "http"
-		}
-		targets = append(targets, newReq)
-	}
+	//if len(targets) == 1 {
+	//	_newReq := *targets[0]
+	//	newReq := &_newReq
+	//	_newURL := *_newReq.URL
+	//	newReq.URL = &_newURL
+	//	if targets[0].URL.Scheme == "http" {
+	//		newReq.URL.Scheme = "https"
+	//	} else {
+	//		newReq.URL.Scheme = "http"
+	//	}
+	//	targets = append(targets, newReq)
+	//}
 	crawlerTask.Targets = targets[:]
 
 	for _, req := range targets {
@@ -222,6 +223,13 @@ func (t *CrawlerTask) Run() {
 	t.Result.AllReqList = []*model.Request{}
 	var simpleFilter filter2.SimpleFilter
 	for _, req := range todoFilterAll {
+		a := req.URL.String()
+		if strings.HasPrefix(a, "data:image") {
+			continue
+		}
+		if strings.HasPrefix(a, "chrome") {
+			continue
+		}
 		if !simpleFilter.UniqueFilter(req) {
 			t.Result.AllReqList = append(t.Result.AllReqList, req)
 		}
@@ -231,6 +239,9 @@ func (t *CrawlerTask) Run() {
 	t.Result.AllDomainList = AllDomainCollect(t.Result.AllReqList)
 	// 子域名
 	t.Result.SubDomainList = SubDomainCollect(t.Result.AllReqList, t.RootDomain)
+	//for _,a := range t.Result.AllReqList{
+	//	fmt.Println(a.URL)
+	//}
 }
 
 /**

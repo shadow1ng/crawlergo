@@ -4,7 +4,7 @@ import (
 	"crawlergo/pkg"
 	"crawlergo/pkg/config"
 	"crawlergo/pkg/logger"
-	model2 "crawlergo/pkg/model"
+	"crawlergo/pkg/model"
 	"crawlergo/pkg/tools"
 	"crawlergo/pkg/tools/requests"
 	"encoding/json"
@@ -42,7 +42,7 @@ type Request struct {
 }
 
 type ProxyTask struct {
-	req       *model2.Request
+	req       *model.Request
 	pushProxy string
 }
 
@@ -59,38 +59,34 @@ var customFormKeywordValues *cli.StringSlice
 var pushAddress string
 var pushProxyPoolMax int
 var pushProxyWG sync.WaitGroup
+var outputPath string
 var outputJsonPath string
 var logLevel string
 
 func main() {
-	author := cli.Author{
-		Name:  "9ian1i",
-		Email: "9ian1itp@gmail.com",
-	}
-
 	ignoreKeywords = cli.NewStringSlice(config.DefaultIgnoreKeywords...)
 	customFormTypeValues = cli.NewStringSlice()
 	customFormKeywordValues = cli.NewStringSlice()
 
 	app := &cli.App{
-		Name:        "crawlergo",
-		Usage:       "A powerful browser crawler for web vulnerability scanners",
-		UsageText:   "crawlergo [global options] url1 url2 url3 ... (must be same host)",
-		Version:     "v0.4.2",
-		Authors:     []*cli.Author{&author},
+		Name:      "crawlergo",
+		Usage:     "A powerful browser crawler for web vulnerability scanners",
+		UsageText: "crawlergo [global options] url1 url2 url3 ... (must be same host)",
+		Version:   "v0.4.2",
 		Flags: []cli.Flag{
 			&cli.PathFlag{
-				Name:        "chromium-path",
-				Aliases:     []string{"c"},
-				Usage:       "`Path` of chromium executable. Such as \"/home/test/chrome-linux/chrome\"",
-				Required:    true,
+				Name:    "chromium-path",
+				Aliases: []string{"c"},
+				Value:   "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+				Usage:   "`Path` of chromium executable. Such as \"/home/test/chrome-linux/chrome\"",
+				//Required:    true,
 				Destination: &taskConfig.ChromiumPath,
 				EnvVars:     []string{"CRAWLERGO_CHROMIUM_PATH"},
 			},
 			&cli.StringFlag{
 				Name:        "custom-headers",
 				Usage:       "add additional `Headers` to each request. The input string will be called json.Unmarshal",
-				Value:       fmt.Sprintf(`{"Spider-Name": "crawlergo", "User-Agent": "%s"}`, config.DefaultUA),
+				Value:       fmt.Sprintf(`{"User-Agent": "%s"}`, config.DefaultUA),
 				Destination: &taskConfig.ExtraHeadersString,
 			},
 			&cli.StringFlag{
@@ -124,6 +120,11 @@ func main() {
 				Name:        "output-json",
 				Usage:       "write output to a json file.Such as result_www_crawlergo_com.json",
 				Destination: &outputJsonPath,
+			},
+			&cli.StringFlag{
+				Name:        "output",
+				Usage:       "write output to a json file.Such as result_www_crawlergo_com.json",
+				Destination: &outputPath,
 			},
 			&cli.BoolFlag{
 				Name:        "incognito-context",
@@ -257,7 +258,6 @@ func main() {
 }
 
 func run(c *cli.Context) error {
-	var req model2.Request
 	signalChan = make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 
@@ -273,17 +273,18 @@ func run(c *cli.Context) error {
 	}
 	logger.Logger.SetLevel(level)
 
-	var targets []*model2.Request
+	var targets []*model.Request
 	for _, _url := range c.Args().Slice() {
-		url, err := model2.GetUrl(_url)
+		url, err := model.GetUrl(_url)
 		if err != nil {
 			logger.Logger.Error("parse url failed, ", err)
 			continue
 		}
+		var req model.Request
 		if postData != "" {
-			req = model2.GetRequest(config.POST, url, getOption())
+			req = model.GetRequest(config.POST, url, getOption())
 		} else {
-			req = model2.GetRequest(config.GET, url, getOption())
+			req = model.GetRequest(config.GET, url, getOption())
 		}
 		req.Proxy = taskConfig.Proxy
 		targets = append(targets, &req)
@@ -347,13 +348,13 @@ func run(c *cli.Context) error {
 	}
 
 	// 输出结果
-	outputResult(result)
-
+	//outputResult(result)
+	myoutputResult(result)
 	return nil
 }
 
-func getOption() model2.Options {
-	var option model2.Options
+func getOption() model.Options {
+	var option model.Options
 	if postData != "" {
 		option.PostData = postData
 	}
@@ -398,6 +399,23 @@ func keywordStringToMap(data []string) (map[string]string, error) {
 	}
 	return parsedData, nil
 }
+func myoutputResult(result *pkg.Result) {
+	urls := geturls(result)
+	for _, i := range urls {
+		fmt.Println(i)
+	}
+	if len(outputPath) != 0 && len(urls) != 0 {
+		var resBytes []byte
+		for _, i := range urls {
+			resBytes = append(resBytes, []byte(i+"\n")...)
+		}
+		tools.WriteAddFile(outputPath, resBytes)
+	}
+	if len(outputJsonPath) != 0 {
+		resBytes := getJsonSerialize(result)
+		tools.WriteFile(outputJsonPath, resBytes)
+	}
+}
 
 func outputResult(result *pkg.Result) {
 	// 输出结果
@@ -406,7 +424,7 @@ func outputResult(result *pkg.Result) {
 		resBytes := getJsonSerialize(result)
 		fmt.Println(string(resBytes))
 	} else if outputMode == "console" {
-		for _, req := range result.ReqList {
+		for _, req := range result.AllReqList {
 			req.FormatPrint()
 		}
 	}
@@ -419,7 +437,7 @@ func outputResult(result *pkg.Result) {
 /**
 原生被动代理推送支持
 */
-func Push2Proxy(reqList []*model2.Request) {
+func Push2Proxy(reqList []*model.Request) {
 	pool, _ := ants.NewPool(pushProxyPoolMax)
 	defer pool.Release()
 	for _, req := range reqList {
@@ -491,4 +509,16 @@ func getJsonSerialize(result *pkg.Result) []byte {
 		log.Fatal("Marshal result error")
 	}
 	return resBytes
+}
+
+func geturls(result *pkg.Result) (output []string) {
+	var tmp = make(map[string]struct{})
+	for _, req := range result.AllReqList {
+		Url := req.URL.GetRawUrl()
+		tmp[Url] = struct{}{}
+	}
+	for i := range tmp {
+		output = append(output, i)
+	}
+	return
 }

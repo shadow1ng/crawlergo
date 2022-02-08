@@ -68,14 +68,19 @@ func GetRequest(method string, URL *URL, options ...Options) Request {
 */
 func (req *Request) FormatPrint() {
 	var tempStr = req.Method
-	tempStr += " " + req.URL.String() + " HTTP/1.1\r\n"
-	for k, v := range req.Headers {
-		tempStr += k + ": " + v.(string) + "\r\n"
-	}
-	tempStr += "\r\n"
+	tempStr += " " + req.URL.String()
 	if req.Method == config.POST {
+		tempStr += "\r\n"
 		tempStr += req.PostData
 	}
+	//tempStr += " " + req.URL.String() + " HTTP/1.1\r\n"
+	//for k, v := range req.Headers {
+	//	tempStr += k + ": " + v.(string) + "\r\n"
+	//}
+	//tempStr += "\r\n"
+	//if req.Method == config.POST {
+	//	tempStr += req.PostData
+	//}
 	fmt.Println(tempStr)
 }
 

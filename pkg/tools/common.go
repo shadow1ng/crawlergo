@@ -38,6 +38,19 @@ func WriteFile(fileName string, content []byte) {
 	}
 }
 
+func WriteAddFile(fileName string, content []byte) {
+	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	defer f.Close()
+	if err != nil {
+		logger.Logger.Error(err.Error())
+	} else {
+		_, err = f.Write(content)
+		if err != nil {
+			logger.Logger.Error("write to file error ", err)
+		}
+	}
+}
+
 func ReadFile(filePath string) []string {
 	filePaths := []string{}
 	f, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
