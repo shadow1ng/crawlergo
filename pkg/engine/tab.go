@@ -224,7 +224,7 @@ func (tab *Tab) Start() {
 		if err.Error() == "context canceled" {
 			return
 		}
-		logger.Logger.Warn("navigate timeout ", tab.NavigateReq.URL.String())
+		//logger.Logger.Warn("navigate timeout ", tab.NavigateReq.URL.String())
 	}
 
 	go func() {

@@ -204,7 +204,7 @@ func (t *CrawlerTask) Run() {
 		initTasks = append(initTasks, req)
 		t.Result.ReqList = append(t.Result.ReqList, req)
 	}
-	logger.Logger.Info("filter repeat, target count: ", len(initTasks))
+	//logger.Logger.Info("filter repeat, target count: ", len(initTasks))
 
 	for _, req := range initTasks {
 		if !engine.IsIgnoredByKeywordMatch(*req, t.Config.IgnoreKeywords) {
@@ -224,7 +224,10 @@ func (t *CrawlerTask) Run() {
 	var simpleFilter filter.SimpleFilter
 	for _, req := range todoFilterAll {
 		a := req.URL.String()
-		if strings.HasPrefix(a, "data:image") {
+		if strings.HasPrefix(a, "data:") {
+			continue
+		}
+		if strings.HasPrefix(a, "file:") {
 			continue
 		}
 		if strings.HasPrefix(a, "chrome") {

@@ -90,7 +90,7 @@ func (bro *Browser) NewTab(timeout time.Duration) (*context.Context, context.Can
 }
 
 func (bro *Browser) Close() {
-	logger.Logger.Info("closing browser.")
+	//logger.Logger.Info("closing browser.")
 	for _, cancel := range bro.tabCancels {
 		cancel()
 	}
