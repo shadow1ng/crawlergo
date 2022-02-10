@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"encoding/json"
 	"github.com/shadow1ng/crawlergo/pkg/config"
 	"github.com/shadow1ng/crawlergo/pkg/engine"
 	"github.com/shadow1ng/crawlergo/pkg/filter"
@@ -134,14 +133,6 @@ func NewCrawlerTask(targets []*model.Request, taskConf TaskConfig) (*CrawlerTask
 
 	if len(taskConf.IgnoreKeywords) == 0 {
 		taskConf.IgnoreKeywords = config.DefaultIgnoreKeywords
-	}
-
-	if taskConf.ExtraHeadersString != "" {
-		err := json.Unmarshal([]byte(taskConf.ExtraHeadersString), &taskConf.ExtraHeaders)
-		if err != nil {
-			logger.Logger.Error("custom headers can't be Unmarshal.")
-			return nil, err
-		}
 	}
 
 	crawlerTask.Browser = engine.InitBrowser(taskConf.ChromiumPath, taskConf.IncognitoContext, taskConf.ExtraHeaders, taskConf.Proxy, taskConf.NoHeadless)
