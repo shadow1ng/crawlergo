@@ -233,6 +233,9 @@ func (t *CrawlerTask) Run() {
 		if strings.HasPrefix(a, "chrome") {
 			continue
 		}
+		if !strings.Contains(a, ".") {
+			continue
+		}
 		if !simpleFilter.UniqueFilter(req) {
 			t.Result.AllReqList = append(t.Result.AllReqList, req)
 		}
